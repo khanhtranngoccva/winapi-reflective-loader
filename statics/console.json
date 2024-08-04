@@ -1,0 +1,274 @@
+[
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/addconsolealias",
+    "name": "AddConsoleAlias"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/allocconsole",
+    "name": "AllocConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/attachconsole",
+    "name": "AttachConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/closepseudoconsole",
+    "name": "ClosePseudoConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/createconsolescreenbuffer",
+    "name": "CreateConsoleScreenBuffer"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/createpseudoconsole",
+    "name": "CreatePseudoConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/consolecontrol",
+    "name": "ConsoleControl"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/fillconsoleoutputattribute",
+    "name": "FillConsoleOutputAttribute"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/fillconsoleoutputcharacter",
+    "name": "FillConsoleOutputCharacter"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/flushconsoleinputbuffer",
+    "name": "FlushConsoleInputBuffer"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/freeconsole",
+    "name": "FreeConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/generateconsolectrlevent",
+    "name": "GenerateConsoleCtrlEvent"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolealias",
+    "name": "GetConsoleAlias"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolealiases",
+    "name": "GetConsoleAliases"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolealiaseslength",
+    "name": "GetConsoleAliasesLength"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolealiasexes",
+    "name": "GetConsoleAliasExes"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolealiasexeslength",
+    "name": "GetConsoleAliasExesLength"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolecp",
+    "name": "GetConsoleCP"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolecursorinfo",
+    "name": "GetConsoleCursorInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsoledisplaymode",
+    "name": "GetConsoleDisplayMode"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolefontsize",
+    "name": "GetConsoleFontSize"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolehistoryinfo",
+    "name": "GetConsoleHistoryInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolemode",
+    "name": "GetConsoleMode"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsoleoriginaltitle",
+    "name": "GetConsoleOriginalTitle"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsoleoutputcp",
+    "name": "GetConsoleOutputCP"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsoleprocesslist",
+    "name": "GetConsoleProcessList"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolescreenbufferinfo",
+    "name": "GetConsoleScreenBufferInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolescreenbufferinfoex",
+    "name": "GetConsoleScreenBufferInfoEx"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsoleselectioninfo",
+    "name": "GetConsoleSelectionInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsoletitle",
+    "name": "GetConsoleTitle"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getconsolewindow",
+    "name": "GetConsoleWindow"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getcurrentconsolefont",
+    "name": "GetCurrentConsoleFont"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getcurrentconsolefontex",
+    "name": "GetCurrentConsoleFontEx"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getlargestconsolewindowsize",
+    "name": "GetLargestConsoleWindowSize"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getnumberofconsoleinputevents",
+    "name": "GetNumberOfConsoleInputEvents"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getnumberofconsolemousebuttons",
+    "name": "GetNumberOfConsoleMouseButtons"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/getstdhandle",
+    "name": "GetStdHandle"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/handlerroutine",
+    "name": "HandlerRoutine"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/peekconsoleinput",
+    "name": "PeekConsoleInput"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/readconsole",
+    "name": "ReadConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/readconsoleinput",
+    "name": "ReadConsoleInput"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/readconsoleinputex",
+    "name": "ReadConsoleInputEx"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/readconsoleoutput",
+    "name": "ReadConsoleOutput"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/readconsoleoutputattribute",
+    "name": "ReadConsoleOutputAttribute"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/readconsoleoutputcharacter",
+    "name": "ReadConsoleOutputCharacter"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/resizepseudoconsole",
+    "name": "ResizePseudoConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/scrollconsolescreenbuffer",
+    "name": "ScrollConsoleScreenBuffer"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsoleactivescreenbuffer",
+    "name": "SetConsoleActiveScreenBuffer"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolecp",
+    "name": "SetConsoleCP"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolectrlhandler",
+    "name": "SetConsoleCtrlHandler"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolecursorinfo",
+    "name": "SetConsoleCursorInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolecursorposition",
+    "name": "SetConsoleCursorPosition"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsoledisplaymode",
+    "name": "SetConsoleDisplayMode"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolehistoryinfo",
+    "name": "SetConsoleHistoryInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolemode",
+    "name": "SetConsoleMode"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsoleoutputcp",
+    "name": "SetConsoleOutputCP"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolescreenbufferinfoex",
+    "name": "SetConsoleScreenBufferInfoEx"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolescreenbuffersize",
+    "name": "SetConsoleScreenBufferSize"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsoletextattribute",
+    "name": "SetConsoleTextAttribute"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsoletitle",
+    "name": "SetConsoleTitle"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setconsolewindowinfo",
+    "name": "SetConsoleWindowInfo"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex",
+    "name": "SetCurrentConsoleFontEx"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/setstdhandle",
+    "name": "SetStdHandle"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/writeconsole",
+    "name": "WriteConsole"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/writeconsoleinput",
+    "name": "WriteConsoleInput"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/writeconsoleoutput",
+    "name": "WriteConsoleOutput"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/writeconsoleoutputattribute",
+    "name": "WriteConsoleOutputAttribute"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/windows/console/writeconsoleoutputcharacter",
+    "name": "WriteConsoleOutputCharacter"
+  }
+]

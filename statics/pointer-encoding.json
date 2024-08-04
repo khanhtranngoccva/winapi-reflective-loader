@@ -1,0 +1,10 @@
+[
+  {
+    "url": "https://learn.microsoft.com/en-us/previous-versions/bb432254(v=vs.85)",
+    "name": "EncodePointer"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/previous-versions/bb432242(v=vs.85)",
+    "name": "DecodePointer"
+  }
+]

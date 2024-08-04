@@ -1,0 +1,27 @@
+{
+  "headers": {
+    "psapi.h": {
+      "preprocessor": {
+        "force": true
+      }
+    }
+  },
+  "preprocessor": {
+    "initial_lines": [
+      "#define __cplusplus 1",
+      "#define _WIN64 1",
+      "#define _AMD64_ 1",
+      "#define _M_AMD64 1",
+      "#define _M_X64 1",
+      "#define _MSC_VER 1939",
+      "#define _MSC_FULL_VER 193933519",
+      "#define __DATE__ 01 30 2024",
+      "#define __LINE__ 4",
+      "#define __STDC__ 1",
+      "#define _XM_SSE_INTRINSICS_ 1",
+      "#define __INTRIN_H_ 1",
+      "#define __export",
+      "#include <minwindef.h>"
+    ]
+  }
+}

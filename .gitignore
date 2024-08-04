@@ -1,0 +1,6 @@
+catalog.json
+database-*
+errors
+.clang_cache
+.venv
+.idea
