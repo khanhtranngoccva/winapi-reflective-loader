@@ -4,7 +4,7 @@ import re
 from pathvalidate import is_valid_filename
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
-from WebPage import WebPage
+from helpers.WebPage import WebPage
 from helpers.errors import EntryProcessingError, WebError, RequirementParsingError
 
 
@@ -54,7 +54,7 @@ def get_function_data(function_entry):
     except Exception as e:
         raise RequirementParsingError(function_entry, requirement_data)
 
-    function_data = {"names": name, "code": code, "headers": headers, "dlls": dlls, "url": function_entry["url"]}
+    function_data = {"name": name, "code": code, "headers": headers, "dlls": dlls, "url": function_entry["url"]}
     return function_data
 
 

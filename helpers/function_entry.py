@@ -19,7 +19,7 @@ def generate_save_path(entry):
 def should_process_entry(entry, program_args):
     save_path = generate_save_path(entry)
     if program_args.headers:
-        return program_args.headers.count(entry["header"].lower()) > 0
+        return program_args.headers.count(entry.get("header", "").lower()) > 0
     if program_args.specific_functions:
         # In case function has ANSI and Unicode variants
         tests = [

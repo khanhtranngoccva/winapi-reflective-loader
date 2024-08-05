@@ -1,5 +1,5 @@
 catalog.json
-database-*
+database*
 errors
 .clang_cache
 .venv

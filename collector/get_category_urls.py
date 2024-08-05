@@ -1,9 +1,8 @@
-import os.path
 import pprint
 import urllib.parse
 from urllib.parse import urlparse
 from selenium.webdriver.common.by import By
-from WebPage import WebPage
+from helpers.WebPage import WebPage
 
 
 def get_category_urls():

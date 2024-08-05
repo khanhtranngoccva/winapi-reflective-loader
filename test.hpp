@@ -1,9 +1,6 @@
-//#include <iostream>
+#define VOID void
+#define _AMD64_ 1
+#define WINAPI_PARTITION_APP 1
 
-#ifdef UNICODE
-#define ReadConsole ReadConsoleW
-#else
-#define ReadConsole ReadConsoleA
-#endif
+#include <winnt.h>
 
-void ReadConsoleW();

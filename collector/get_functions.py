@@ -1,10 +1,9 @@
 import pprint
 import re
-import traceback
 
 from selenium.webdriver.common.by import By
 
-from WebPage import WebPage
+from helpers.WebPage import WebPage
 
 
 def get_function_from_side_entry(data: str):
@@ -64,7 +63,7 @@ def get_functions_by_header_entry(category_entry):
 
 
 if __name__ == '__main__':
-    pprint.pp(get_functions_by_technology_entry({
-        "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/",
-        "header": "Fileapi.h"
+    pprint.pp(get_functions_by_header_entry({
+        "url": "https://learn.microsoft.com/en-us/windows/win32/api/processenv/",
+        "header": "processenv.h"
     }))

@@ -4,134 +4,86 @@ import pprint
 import shutil
 import sys
 import argparse
+import traceback
 
+from tqdm import tqdm
+
+import helpers.errors
+from generator import preparation, builder
 from helpers import arguments
 from helpers.pe import analyze_imports
 
 
-def normalize(definition):
-    def stage1():
-        attributes_needed = ["headers", "dlls", "url", "signatures"]
-        attributes_missing = []
-        for attribute in attributes_needed:
-            if attribute not in definition or definition[attribute] is None:
-                attributes_missing.append(attribute)
-        if attributes_missing:
-            raise AttributeError(
-                f"Definition {definition.get('name')} missing attributes for function definition: {', '.join(attributes_missing)}")
-
-    def stage2():
-        sig_attributes_needed = ["name", "ret", "params", "inline", "noexcept", "vararg"]
-        for signature in definition.get("signatures", []):
-            sig_attributes_missing = []
-            for attribute in sig_attributes_needed:
-                if attribute not in signature or signature[attribute] is None:
-                    sig_attributes_missing.append(attribute)
-            if sig_attributes_missing:
-                raise AttributeError(
-                    f"Definition {definition.get('name')} missing attributes for function definition: {', '.join(sig_attributes_missing)}")
-
-    stage1()
-    stage2()
-    for i, v in enumerate(definition["headers"]):
-        definition["headers"][i] = v.lower()
-    for i, v in enumerate(definition["dlls"]):
-        definition["dlls"][i] = v.lower()
-
-
-def generate_loader_from_definition(definition, opts):
-    generated_signature_code = []
-
-    def generate_signature_code(signature, header, dll):
-        signature_param_parts = []
-        for param in signature["params"]:
-            signature_param_parts.append(f"{param['type']} {param['name']}")
-        definition_param_string = ", ".join(signature_param_parts)
-
-        noexcept_string = "noexcept" if signature["noexcept"] else ""
-
-        function_header_without_semi = f"{signature['ret']} {signature['name']} ({definition_param_string}) {noexcept_string}"
-        global_memo_variable = f"$$GLOB$${signature['name']}"
-
-        signature_args_parts = []
-        for param in signature["params"]:
-            signature_args_parts.append(param['name'])
-        signature_args_string = ", ".join(signature_args_parts)
-
-        function_body = f"""{{
-    if (!{global_memo_variable}) {{
-        {global_memo_variable} = (decltype({signature['name']})*) load_function((char*)"{dll}", (char*)"{signature['name']}");
-    }}
-    return {global_memo_variable}({signature_args_string});
-}}"""
-
-        function_implementation = f"""{function_header_without_semi}
-    {function_body}"""
-
-        function_header = f"""inline decltype({signature['name']})* {global_memo_variable};"""
-
-        function_include = f"""#include "{header}\""""
-
-        return {
-            "include": function_include,
-            "header": function_header,
-            # if the function has already been declared inline in the header, it must have been manually defined.
-            "implementation": "" if signature["inline"] else function_implementation,
-        }
-
-    for signature in definition["signatures"]:
-        for dll in definition["dlls"]:
-            if opts["exclude_dlls"].count(dll.lower()) > 0:
-                continue
-            generated_signature_code.append(generate_signature_code(signature, definition["headers"][0], dll))
-            break
-
-    return generated_signature_code
-
-
-def should_generate_signature_code(definition, opts):
-    if opts.get("executable_imports"):
-        for executable_import in opts["executable_imports"]:
-            for signature in definition["signatures"]:
-                potential_import_name = signature["name"]
-                if potential_import_name == executable_import["name"]:
-                    opts["executable_imports"].remove(executable_import)
-                    return True
-        return False
-    else:
+def should_generate_signature_code(name, *_, imports):
+    if imports is None:
         return True
+    for executable_import in imports:
+        if name == executable_import["name"]:
+            return True
+    return False
+
+
+def pop_executable_imports(name, *_, imports):
+    if imports is None:
+        return
+    for executable_import in imports:
+        if name == executable_import["name"]:
+            imports.remove(executable_import)
+            return
 
 
 def generate_loaders(database, opts):
+    def _get_first_header(sig):
+        if len(sig.get("headers")) > 0:
+            return sig["headers"][0]
+        else:
+            return ""
+
+    database.sort(key=_get_first_header)
+
     structure = {}
 
-    for definition in database:
+    processed_names = set()
+
+    for definition in tqdm(database):
         try:
-            normalize(definition)
-            should_generate = should_generate_signature_code(definition, opts)
-            if not should_generate:
-                continue
-            processed_list = generate_loader_from_definition(definition, opts)
-            header = definition.get("headers")[0]
-            function_data = structure.get(header)
-            if function_data is None:
-                function_data = {
-                    "includes": set(),
-                    "headers": [],
-                    "implementations": [],
-                }
-                structure[header] = function_data
-            includes = function_data.get("includes")
-            headers = function_data.get("headers")
-            implementations = function_data.get("implementations")
-
-            for processed in processed_list:
-                includes.add(processed['include'])
-                headers.append(processed['header'])
-                implementations.append(processed['implementation'])
-
-        except AttributeError as e:
-            print(e, file=sys.stderr)
+            preparation.normalize(definition)
+            sigs = preparation.get_signatures(definition)
+            for signature in sigs:
+                if not should_generate_signature_code(
+                        signature["signature_name"],
+                        imports=opts.get("executable_imports")
+                ):
+                    continue
+                match_result = builder.build_loader_from_signature(signature)
+                if match_result.loader is None:
+                    continue
+                if (match_result.loader.mangled_name or match_result.loader.name) in processed_names:
+                    continue
+                header = match_result.header
+                function_data = structure.get(header)
+                if function_data is None:
+                    function_data = {
+                        "includes": set(),
+                        "headers": [],
+                        "implementations": [],
+                    }
+                    structure[header] = function_data
+                includes = function_data.get("includes")
+                headers = function_data.get("headers")
+                implementations = function_data.get("implementations")
+                includes.add(match_result.header)
+                for extra_include in match_result.loader.extra_includes:
+                    includes.add(extra_include)
+                headers.append(match_result.loader.header)
+                implementations.append(match_result.loader.implementation)
+                processed_names.add(match_result.loader.mangled_name or match_result.loader.name)
+                pop_executable_imports(
+                    signature["signature_name"], imports=opts.get("executable_imports")
+                )
+        except Exception as e:
+            e.definition = definition
+            helpers.errors.save_to_disk(e)
 
     output = {}
     for original_header_name, function_data in structure.items():
@@ -148,7 +100,7 @@ def generate_loaders(database, opts):
         else:
             new_impl_include = new_header_name
 
-        includes_list = list(function_data['includes'])
+        includes_list = list(f"#include \"{include}\"" for include in function_data['includes'])
 
         extra_local_includes = reversed(opts.get("extra_local_includes", {}).get(original_header_name, []))
         for extra_local_include in extra_local_includes:
@@ -224,10 +176,11 @@ if __name__ == '__main__':
     disables = args.disables or []
     enables = args.enables or []
     extra_local_includes = arguments.parse_metavar_array(args.extra_local_includes or [])
-    executable_imports = []
+    executable_imports = None
     exclude_dlls = []
 
     if args.executable:
+        executable_imports = []
         for import_data in analyze_imports(args.executable):
             executable_imports.append(import_data)
 
@@ -269,7 +222,7 @@ if __name__ == '__main__':
 
     includes_string = "\n".join(includes)
     includes_string_wrapped = f"""#pragma once
-    
+
 {includes_string}
 """
     with open(args.output_summary, "w") as f:

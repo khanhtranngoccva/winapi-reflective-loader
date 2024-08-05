@@ -43,12 +43,11 @@ def serialize(obj, *_, serialize_stack=None):
             out_obj["__type"] = "__PURE_DICT__"
             out_obj["__value"] = out
             return out_obj
-        if isinstance(obj, list) or isinstance(obj, tuple) or isinstance(obj, set) or isinstance(obj,
-                                                                                                 collections.abc.Iterable):
+        if isinstance(obj, list) or isinstance(obj, tuple) or isinstance(obj, set) or isinstance(obj,                                                                               collections.abc.Iterable):
             out = []
             for v in obj:
                 out.append(serialize(v, serialize_stack=recursive_stack))
-            out_obj["__type"] = "__PURE_DICT__"
+            out_obj["__type"] = "__PURE_ITERABLE__"
             out_obj["__value"] = out
             return out_obj
         if callable(obj):
@@ -118,12 +117,12 @@ class WebError(EntryProcessingError):
         return "Failure to process entry due to web/element issues: {}".format(self.name)
 
 
-class ParseError(EntryProcessingError):
-    def __init__(self, entry, implementation, header, nested_error):
-        super().__init__(entry)
-        self.nested_error = nested_error
-        self.implementation = implementation
-        self.header = header
+class ParseError(RuntimeError):
+    def __init__(self, signature):
+        self.signature = signature
+
+    def __repr__(self):
+        return "Failure to process signature: {}".format(self.signature)
 
 
 class EntrySaveError(RuntimeError):
@@ -134,6 +133,25 @@ class EntrySaveError(RuntimeError):
 
     def __repr__(self):
         return "Failure to save entry: {}".format(self.entry.get("name"))
+
+
+class DefineSearchError(RuntimeError):
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+
+    def __repr__(self):
+        return "Failed to search for defines in entry: {}".format(self.path)
+
+
+class AliasCollectionError(RuntimeError):
+    def __init__(self, path, e):
+        super().__init__()
+        self.path = path
+        self.nested_error = e
+
+    def __repr__(self):
+        return "Failed to search for aliases in header {}: {}".format(self.path, self.nested_error)
 
 
 class EntryCacheCheckError(RuntimeError):
