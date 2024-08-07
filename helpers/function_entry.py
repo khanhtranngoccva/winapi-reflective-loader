@@ -3,6 +3,7 @@ import json
 import os
 import re
 
+import constants
 from helpers.errors import EntrySaveError, EntryCacheCheckError
 
 
@@ -12,7 +13,7 @@ def hash_entry(entry):
 
 def generate_save_path(entry):
     save_fn = f"{hash_entry(entry)}.json"
-    save_path = os.path.join("database", save_fn)
+    save_path = os.path.join(constants.ROOT_PATH, "database", save_fn)
     return save_path
 
 

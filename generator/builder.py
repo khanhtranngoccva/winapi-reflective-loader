@@ -1,3 +1,4 @@
+import constants
 import helpers.errors
 from helpers.signature import processor
 from clang import cindex
@@ -14,6 +15,14 @@ def search_node_from_ast(tree: cindex.TranslationUnit, kind):
 
 def get_matching_function(signature, *, parse_code=False):
     for header in signature["headers"]:
+        # Do not parse incompatible headers.
+        do_not_parse = False
+        for disabled_header in constants.DISABLED_HEADERS:
+            if disabled_header.lower() == header.lower():
+                do_not_parse = True
+                break
+        if do_not_parse:
+            continue
         ast = processor.parse_builtin_header(header)
         for function_node in search_node_from_ast(ast, kind="FUNCTION_DECL"):
             if function_node.spelling == signature["signature_name"]:

@@ -3,6 +3,7 @@ import os
 import sys
 import argparse
 
+import constants
 from collector import get_category_urls
 from helpers import function_entry, pe
 from helpers.errors import save_to_disk
@@ -12,6 +13,8 @@ from collector.get_functions import get_functions_by_header_entry, get_functions
 from tqdm import tqdm
 import concurrent.futures
 
+CATALOG_PATH = os.path.join(constants.ROOT_PATH, "catalog.json")
+
 
 def stage1(*, args):
     stopped = False
@@ -20,7 +23,7 @@ def stage1(*, args):
         if args.reset_cached_catalog:
             # Assume the file is not found, which forces the script to start from scratch.
             raise FileNotFoundError
-        with open("catalog.json", "r") as f:
+        with open(CATALOG_PATH, "r") as f:
             # Without forcing a catalog reset, the function still reads the catalog so that new entries
             # can be appended for cached runs.
             all_function_entries = json.load(f)
@@ -70,7 +73,7 @@ def stage1(*, args):
 
     all_function_entries = function_entry.deduplicate_entries(all_function_entries)
 
-    with open("catalog.json", "w") as f:
+    with open(CATALOG_PATH, "w") as f:
         json.dump(all_function_entries, f, indent=2)
 
     for static_dir in args.static_dirs:
@@ -166,7 +169,7 @@ def main():
     else:
         print("Entry caching is disabled.")
 
-    os.makedirs("database", exist_ok=True)
+    os.makedirs(os.path.join(constants.ROOT_PATH, "database"), exist_ok=True)
 
     for i, header in enumerate(args.headers):
         if header:

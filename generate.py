@@ -8,6 +8,7 @@ import traceback
 
 from tqdm import tqdm
 
+import constants
 import helpers.errors
 from generator import preparation, builder
 from helpers import arguments
@@ -136,7 +137,8 @@ def generate_loaders(database, opts):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", dest="input", required=True, help="Input database")
+    parser.add_argument("-i", "--input", dest="input", required=False,
+                        default=os.path.join(constants.ROOT_PATH, "database"), help="Input database")
     parser.add_argument("-oh", "--output-header", dest="output_header", required=True, help="Header output directory")
     parser.add_argument("-oi", "--output-implementation", dest="output_implementation", required=True,
                         help="Implementation output directory")
@@ -217,7 +219,8 @@ if __name__ == '__main__':
             f.write(data["implementation"])
         with open(header_path, "w") as f:
             f.write(data["header"])
-        shutil.copytree("winloader", args.output_implementation, False, ignore=shutil.ignore_patterns(""),
+        shutil.copytree(os.path.join(constants.ROOT_PATH, "winloader"), args.output_implementation, False,
+                        ignore=shutil.ignore_patterns(""),
                         dirs_exist_ok=True)
 
     includes_string = "\n".join(includes)

@@ -7,6 +7,8 @@ import sys
 import traceback
 import uuid
 
+import constants
+
 
 def serialize(obj, *_, serialize_stack=None):
     try:
@@ -43,7 +45,8 @@ def serialize(obj, *_, serialize_stack=None):
             out_obj["__type"] = "__PURE_DICT__"
             out_obj["__value"] = out
             return out_obj
-        if isinstance(obj, list) or isinstance(obj, tuple) or isinstance(obj, set) or isinstance(obj,                                                                               collections.abc.Iterable):
+        if isinstance(obj, list) or isinstance(obj, tuple) or isinstance(obj, set) or isinstance(obj,
+                                                                                                 collections.abc.Iterable):
             out = []
             for v in obj:
                 out.append(serialize(v, serialize_stack=recursive_stack))
@@ -69,7 +72,7 @@ def serialize(obj, *_, serialize_stack=None):
 
 
 execution_time = datetime.datetime.now().isoformat().replace(":", "_")
-error_dir = os.path.join("errors", execution_time)
+error_dir = os.path.join(constants.ROOT_PATH, "errors", execution_time)
 os.makedirs(error_dir, exist_ok=True)
 
 
