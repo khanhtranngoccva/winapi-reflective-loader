@@ -1,6 +1,55 @@
+import hashlib
+
 from clang import cindex
 import generator.types
 import helpers.cindex.modifications
+
+
+def generate_struct_members(buf_length):
+    data_member_sizes = [
+        (8, "unsigned __int64"),
+        (4, "unsigned __int32"),
+        (2, "unsigned __int16"),
+        (1, "unsigned __int8"),
+    ]
+    while buf_length > 0:
+        for candidate_size, data_type in data_member_sizes:
+            if buf_length >= candidate_size:
+                buf_length -= candidate_size
+                yield candidate_size, data_type
+                break
+
+
+def transform_string_to_struct(variable_name, encoded_string: bytes, null_byte=True):
+    if null_byte:
+        encoded_string += b"\0"  # Null byte
+    encoded_length = len(encoded_string)
+    member_index = 0
+    current_seek = 0
+    struct_name = f"$$STRINGTYPE$${variable_name}"
+    struct_var = f"{variable_name}"
+    members = []
+    instructions = []
+    for member_size, data_type in generate_struct_members(encoded_length):
+        member_name = f"m{member_index}"
+        member_value = int.from_bytes(encoded_string[current_seek:current_seek + member_size], byteorder="little")
+        member_instruction = f"{struct_var}.{member_name} = {member_value}U;"
+        instructions.append(member_instruction)
+        member_declaration = f"{data_type} {member_name};"
+        members.append(member_declaration)
+        current_seek += member_size
+        member_index += 1
+
+    member_string = "\n".join(members)
+    instruction_string = "\n".join(instructions)
+    output = f"""typedef struct {struct_name} {{
+{member_string}
+}} {struct_name};
+    
+{struct_name} {struct_var};
+{instruction_string}  
+"""
+    return output
 
 
 def construct_loader(signature, match: generator.types.FunctionMatch):
@@ -36,7 +85,7 @@ def construct_loader(signature, match: generator.types.FunctionMatch):
         param_tokens.append("...")
         delegated_arg_tokens.append(variadic_list_variable)
         variadic_list_part1 = f"""va_list {variadic_list_variable};
-    va_start({variadic_list_variable}, {delegated_arg_tokens[-2]});"""
+va_start({variadic_list_variable}, {delegated_arg_tokens[-2]});"""
         variadic_list_part2 = f"""va_end({variadic_list_variable});"""
     else:
         variadic_list_part1 = ""
@@ -56,14 +105,21 @@ def construct_loader(signature, match: generator.types.FunctionMatch):
         out_assignment = ""
         return_statement = ""
 
+    name_hash = hashlib.sha256()
+    name_hash.update(node.mangled_name.encode("ansi"))
+    name_hash_digest = name_hash.digest()
+    name_hash_var = "$$VAR$$func_hash"
+    name_hash_instructions = transform_string_to_struct(name_hash_var, name_hash_digest, null_byte=True)
+
     function_body = f"""{{
-    if (!{global_memo_variable}) {{
-        {global_memo_variable} = (decltype({node.spelling})*) load_function((char*)"{signature["dlls"][0]}", (char*)"{node.mangled_name}");
-    }}
-    {variadic_list_part1}
-    {out_assignment}{global_memo_variable}({delegated_arg_str});
-    {variadic_list_part2}
-    {return_statement}
+{name_hash_instructions}
+if (!{global_memo_variable}) {{
+    {global_memo_variable} = (decltype({node.spelling})*) winloader::load_function_by_hash((char*)"{signature["dlls"][0]}", (char*)&{name_hash_var});
+}}
+{variadic_list_part1}
+{out_assignment}{global_memo_variable}({delegated_arg_str});
+{variadic_list_part2}
+{return_statement}
 }}"""
 
     implementation = f"""{header_declaration_without_semicolon} {function_body}"""

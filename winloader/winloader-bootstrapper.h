@@ -47,16 +47,25 @@ typedef struct _PEB {
     PPEB_LDR_DATA Ldr;
 } PEB, *PPEB;
 
-class Bootstrapper {
-    PEB *peb = nullptr;
-public:
-    Bootstrapper();
+namespace winloader {
+    class Bootstrapper {
+        PEB *peb = nullptr;
 
-    void *getModuleByName(WCHAR *moduleName);
+        static void *resolveExportRVA(LPVOID module, unsigned long long int rva);
 
-    static void *getFunctionByName(LPVOID module, const char *functionName);
+        static PIMAGE_NT_HEADERS getNtHeaders(LPVOID module);
 
-    void resumeExecution(DWORD oldEntryPoint);
+    public:
+        Bootstrapper();
 
-    void *getCurrentImage();
-};
+        void *getModuleByName(WCHAR *moduleName);
+
+        static void *getFunctionByName(LPVOID module, const char *functionName);
+
+        static void *getFunctionByHash(LPVOID module, const char *hash);
+
+        void resumeExecution(DWORD oldEntryPoint);
+
+        void *getCurrentImage();
+    };
+}
