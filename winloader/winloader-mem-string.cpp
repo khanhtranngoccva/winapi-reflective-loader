@@ -14,7 +14,7 @@ void winloader::memcpy(void *dest, const void *source, size_t bytes) {
 
 void winloader::strcpy_s(char *dest, const char *source, size_t max_bytes) {
     size_t i;
-    for (i = 0; i < max_bytes - 1 && dest[i]; i++) {
+    for (i = 0; i < max_bytes - 1 && source[i]; i++) {
         ((char *) dest)[i] = ((char *) source)[i];
     }
     dest[i] = 0;
@@ -25,7 +25,7 @@ void winloader::strcpy_sl(char *dest, const char *source, size_t length, size_t 
         length = max_bytes - 1;
     }
     size_t i;
-    for (i = 0; i < length && dest[i]; i++) {
+    for (i = 0; i < length && source[i]; i++) {
         ((char *) dest)[i] = ((char *) source)[i];
     }
     dest[i] = 0;
