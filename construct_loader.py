@@ -163,8 +163,10 @@ va_start({variadic_list_variable}, {delegated_arg_tokens[-2]});"""
 
     function_body = f"""{{
 if (!{global_memo_variable}) {{
+    winloader::entropy_stub();
     {name_hash_instructions}
     {dll_instructions}
+    winloader::entropy_stub();
     {global_memo_variable} = (decltype({node.spelling})*) winloader::load_function_by_hash({dll_name_var}, (char*)&{name_hash_var});
 }}
 {variadic_list_part1}

@@ -119,7 +119,8 @@ def generate_loaders(database, opts):
 {headers_string}
 """
 
-        implementation_file_string = f"""#include "winloader-bootstrap.h"
+        implementation_file_string = f"""#include "winloader-entropy.h"
+#include "winloader-bootstrap.h"
 #include "winloader-numbers.h"
 #include "winloader-mem-strings.h"
 #include "{new_impl_include}"
