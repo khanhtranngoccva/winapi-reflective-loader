@@ -1,6 +1,5 @@
 import hashlib
-
-from clang import cindex
+import random
 import generator.types
 import helpers.cindex.modifications
 
@@ -13,15 +12,34 @@ def generate_struct_members(buf_length):
         (1, "unsigned __int8"),
     ]
     while buf_length > 0:
+        candidates = []
         for candidate_size, data_type in data_member_sizes:
             if buf_length >= candidate_size:
-                buf_length -= candidate_size
-                yield candidate_size, data_type
-                break
+                candidates.append([candidate_size, data_type])
+        if candidates:
+            candidate_size, data_type = random.choice(candidates)
+            buf_length -= candidate_size
+            yield candidate_size, data_type
 
 
-def transform_string_to_struct(variable_name, encoded_string: bytes, null_byte=True):
-    if null_byte:
+def generate_member_instruction(struct_var, member_name, data_type, byte_slice, byte_order):
+    head = f"{struct_var}.{member_name} = "
+    slice_length = len(byte_slice)
+    xor_val = int.from_bytes(random.randbytes(slice_length), byteorder="little")
+    original_member_value = int.from_bytes(byte_slice, byteorder="little")
+    obfuscated_le_value = xor_val ^ original_member_value
+    if byte_order == "little":
+        expr = f"winloader::n_xor<{data_type}>({obfuscated_le_value}U, {xor_val}U)"
+    else:
+        obfuscated_be_value = int.from_bytes(obfuscated_le_value.to_bytes(slice_length, byteorder="little"),
+                                             byteorder="big")
+        # original_member_value = endian_swap(obfuscated_be_value) ^ xor_val
+        expr = f"winloader::n_xor<{data_type}>(winloader::endian_swap(({data_type}) {obfuscated_be_value}U), {xor_val}U)"
+    return f"{head} {expr};"
+
+
+def transform_buffer_to_struct(variable_name, encoded_string: bytes, null_bytes=1):
+    for i in range(null_bytes):
         encoded_string += b"\0"  # Null byte
     encoded_length = len(encoded_string)
     member_index = 0
@@ -31,25 +49,54 @@ def transform_string_to_struct(variable_name, encoded_string: bytes, null_byte=T
     members = []
     instructions = []
     for member_size, data_type in generate_struct_members(encoded_length):
+        byte_order = "little"
+        if member_size > 1 and random.randrange(0, 3):
+            # 2/3 chance for member to be big-endian and 1/3 chance to be little-endian
+            byte_order = "big"
         member_name = f"m{member_index}"
-        member_value = int.from_bytes(encoded_string[current_seek:current_seek + member_size], byteorder="little")
-        member_instruction = f"{struct_var}.{member_name} = {member_value}U;"
+        byte_slice = encoded_string[current_seek:current_seek + member_size]
+        member_instruction = generate_member_instruction(struct_var, member_name, data_type, byte_slice, byte_order)
         instructions.append(member_instruction)
         member_declaration = f"{data_type} {member_name};"
         members.append(member_declaration)
         current_seek += member_size
         member_index += 1
 
+    # This helps confuse some smarter detection engines - they can detect multiple mov instructions and conclude that
+    # there is a hidden string in the form of a struct.
+    random.shuffle(instructions)
+
     member_string = "\n".join(members)
     instruction_string = "\n".join(instructions)
-    output = f"""typedef struct {struct_name} {{
+    output = f"""#pragma pack(push, 1)
+typedef struct {struct_name} {{
 {member_string}
 }} {struct_name};
-    
+#pragma pack(pop)
+
 {struct_name} {struct_var};
 {instruction_string}  
 """
     return output
+
+
+def transform_string_to_stack_string(var_name, string_item, encoding):
+    if encoding == "utf-16le":
+        char_size = 2
+        data_type = "wchar_t"
+    elif encoding == 'utf-8':
+        char_size = 1
+        data_type = "char"
+    elif encoding == 'ansi':
+        char_size = 1
+        data_type = "char"
+    else:
+        raise Exception("Other encodings are not supported.")
+    impl_var_name = f"$$STACKSTRING$${var_name}"
+    member_instructions = transform_buffer_to_struct(impl_var_name, string_item.encode(encoding), char_size)
+    cast_instruction = f"auto {var_name} = ({data_type}*) &{impl_var_name};"
+    return f"""{member_instructions}
+{cast_instruction}"""
 
 
 def construct_loader(signature, match: generator.types.FunctionMatch):
@@ -109,12 +156,16 @@ va_start({variadic_list_variable}, {delegated_arg_tokens[-2]});"""
     name_hash.update(node.mangled_name.encode("ansi"))
     name_hash_digest = name_hash.digest()
     name_hash_var = "$$VAR$$func_hash"
-    name_hash_instructions = transform_string_to_struct(name_hash_var, name_hash_digest, null_byte=True)
+    name_hash_instructions = transform_buffer_to_struct(name_hash_var, name_hash_digest, null_bytes=1)
+
+    dll_name_var = "$$VAR$$dll_name"
+    dll_instructions = transform_string_to_stack_string(dll_name_var, signature["dlls"][0], encoding="utf-8")
 
     function_body = f"""{{
-{name_hash_instructions}
 if (!{global_memo_variable}) {{
-    {global_memo_variable} = (decltype({node.spelling})*) winloader::load_function_by_hash((char*)"{signature["dlls"][0]}", (char*)&{name_hash_var});
+    {name_hash_instructions}
+    {dll_instructions}
+    {global_memo_variable} = (decltype({node.spelling})*) winloader::load_function_by_hash({dll_name_var}, (char*)&{name_hash_var});
 }}
 {variadic_list_part1}
 {out_assignment}{global_memo_variable}({delegated_arg_str});
@@ -122,7 +173,12 @@ if (!{global_memo_variable}) {{
 {return_statement}
 }}"""
 
-    implementation = f"""{header_declaration_without_semicolon} {function_body}"""
+    implementation = f"""#pragma optimize("", off)
+    {header_declaration_without_semicolon} {function_body}
+#pragma optimize("", on)"""
+
+    # implementation = f"""{header_declaration_without_semicolon} {function_body}"""
+
     global_variable = f"inline decltype({node.spelling})* {global_memo_variable};"
 
     extra_includes = []
@@ -130,3 +186,7 @@ if (!{global_memo_variable}) {{
         extra_includes.append("stdarg.h")
 
     return generator.types.Loader(node.spelling, node.mangled_name, implementation, global_variable, extra_includes)
+
+
+if __name__ == '__main__':
+    print(transform_string_to_stack_string("cim_namespace", "root\\cimv2".encode("utf-16le"), 2))

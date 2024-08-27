@@ -1,6 +1,6 @@
 #include "winloader-sha256.h"
 #include "winloader-numbers.h"
-#include "winloader-mem-string.h"
+#include "winloader-mem-strings.h"
 
 #define WINLOADER_SHA256_CHUNK_SIZE 64
 
@@ -33,7 +33,8 @@ void winloader::sha256(const char *input, char output[32]) {
 
     auto string_length = winloader::strlen(input);
     // Pad data with 0's until data is a multiple of 512 bits, which is 64 bytes. (technically, 64 bits less than 512, but these 64 bits will be later appended.)
-    auto temp_buffer_length = winloader::min(minimum_divisible_by(string_length + 1, WINLOADER_SHA256_CHUNK_SIZE), MAX_ALLOWED_SHA256_BUF_SIZE);
+    auto temp_buffer_length = winloader::minimum(minimum_divisible_by(string_length + 1, WINLOADER_SHA256_CHUNK_SIZE),
+                                                 MAX_ALLOWED_SHA256_BUF_SIZE);
     char buffer[MAX_ALLOWED_SHA256_BUF_SIZE];
     winloader::memset(buffer, 0, MAX_ALLOWED_SHA256_BUF_SIZE);
     // Copy input to temp buffer.

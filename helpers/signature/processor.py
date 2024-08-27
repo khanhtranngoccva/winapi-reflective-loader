@@ -42,8 +42,11 @@ def parse_builtin_header(header_file, *, cached=True):
             pass
 
     # If cache is not found, start parsing
-    header_content = f"""#define _AMD64_ 1
-#include <minwindef.h>
+    header_content = f"""#define WINVER 0x0A00
+#define _AMD64_ 1
+#define _USER32_ 1
+#include <cstdint>
+#include <windef.h>
 #include "{header_file}"
 """
     parsed = index.parse("evaluate.hpp", ["-Wall"], unsaved_files=[

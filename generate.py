@@ -120,6 +120,8 @@ def generate_loaders(database, opts):
 """
 
         implementation_file_string = f"""#include "winloader-bootstrap.h"
+#include "winloader-numbers.h"
+#include "winloader-mem-strings.h"
 #include "{new_impl_include}"
 
 {implementations_string}"""

@@ -29,6 +29,13 @@ unsigned __int32 winloader::endian_swap(unsigned __int32 input) {
     return output;
 }
 
+unsigned __int16 winloader::endian_swap(unsigned __int16 input) {
+    auto output = input;
+    auto ptr = (char *) &output;
+    byte_swap(&ptr[0], &ptr[1]);
+    return output;
+}
+
 
 size_t winloader::minimum_divisible_by(size_t dividend, size_t divisor) {
     if (!(dividend % divisor)) {
@@ -37,6 +44,6 @@ size_t winloader::minimum_divisible_by(size_t dividend, size_t divisor) {
     return (dividend / divisor + 1) * divisor;
 }
 
-size_t winloader::min(size_t a1, size_t a2) {
+size_t winloader::minimum(size_t a1, size_t a2) {
     return a1 < a2 ? a1 : a2;
 }

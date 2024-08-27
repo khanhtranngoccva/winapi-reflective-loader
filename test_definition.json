@@ -1,0 +1,12 @@
+{
+  "code": "BOOL GetCursorPos(\n  [out] LPPOINT lpPoint\n);",
+  "headers": [
+    "winuser.h",
+    "windows.h"
+  ],
+  "dlls": [
+    "user32.dll"
+  ],
+  "url": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos",
+  "name": "GetCursorPos"
+}

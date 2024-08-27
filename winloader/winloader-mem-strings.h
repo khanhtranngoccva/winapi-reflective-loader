@@ -18,4 +18,4 @@ namespace winloader {
     void strcpy_sl(char *dest, const char *source, size_t length, size_t max_bytes);
 
     void strcpy(char *dest, const char *source);
-}
+};

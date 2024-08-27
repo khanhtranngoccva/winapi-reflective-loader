@@ -2,7 +2,7 @@
 #include "winloader-bootstrapper.h"
 #include "winloader-environment.h"
 #include "winloader-sha256.h"
-#include "winloader-mem-string.h"
+#include "winloader-mem-strings.h"
 #include "winloader-bootstrap.h"
 #include "intrin.h"
 
@@ -12,13 +12,19 @@
 
 #define WINLOADER_MAX_ALLOWED_FORWARDED_NAME 512
 
+#pragma optimize("", off)
 winloader::Bootstrapper::Bootstrapper() {
 #if defined(ENVIRONMENT64)
-    this->peb = (PPEB) __readgsqword(0x60);
+    unsigned long long s1 = abs(0x452);
+    unsigned long long s2 = abs(0x432);
+    this->peb = (PPEB) __readgsqword(s1 ^ s2);
 #else
+    unsigned long s1 = abs(0x372);
+    unsigned long s2 = abs(0x342);
     this->peb = (PPEB) __readfsdword(0x30);
 #endif
 }
+#pragma optimize("", on)
 
 void *winloader::Bootstrapper::getModuleByName(WCHAR *moduleName) {
     PPEB_LDR_DATA ldr = this->peb->Ldr;

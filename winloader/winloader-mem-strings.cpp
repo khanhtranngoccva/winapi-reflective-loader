@@ -1,4 +1,4 @@
-#include "winloader-mem-string.h"
+#include "winloader-mem-strings.h"
 
 size_t winloader::strlen(const char *str) {
     for (size_t i = 0;; i++) {
