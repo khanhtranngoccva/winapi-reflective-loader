@@ -12,10 +12,16 @@ import constants
 import helpers.errors
 from generator import preparation, builder
 from helpers import arguments
+from helpers.import_generator import generate_import_libraries
 from helpers.pe import analyze_imports
 
 
-def should_generate_signature_code(name, *_, imports):
+def should_generate_signature_code(name, *_, imports, implicit_functions):
+    if implicit_functions:
+        for group in implicit_functions:
+            for function_entry in group["functions"]:
+                if name == function_entry:
+                    return False
     if imports is None:
         return True
     for executable_import in imports:
@@ -53,7 +59,8 @@ def generate_loaders(database, opts):
             for signature in sigs:
                 if not should_generate_signature_code(
                         signature["signature_name"],
-                        imports=opts.get("executable_imports")
+                        imports=opts.get("executable_imports"),
+                        implicit_functions=opts.get("implicit_functions"),
                 ):
                     continue
                 match_result = builder.build_loader_from_signature(signature)
@@ -154,17 +161,31 @@ if __name__ == '__main__':
                         help="Header include files")
     parser.add_argument("-exd", "--exclude-dll", dest="exclude_dlls", type=str, action="append", default=[],
                         help="Disable DLLs that are not available on the system. Helps resolve conflicts.")
-    g1 = parser.add_mutually_exclusive_group()
-    g1.add_argument("-d", "--disable", dest="disables", type=str, action="append", default=None,
-                    help="Disable headers to increase compatibility")
-    g1.add_argument("-e", "--enable", dest="enables", type=str, action="append", default=None,
-                    help="Enable selected headers and disable everything else")
-    g1.add_argument("-exe", "--executable", dest="executable", type=str, default=None,
-                    help="Automatically pick function definitions based on executable")
+    selector_group = parser.add_mutually_exclusive_group()
+    selector_group.add_argument("-d", "--disable", dest="disables", type=str, action="append", default=None,
+                                help="Disable headers to increase compatibility")
+    selector_group.add_argument("-e", "--enable", dest="enables", type=str, action="append", default=None,
+                                help="Enable selected headers and disable everything else")
+    selector_group.add_argument("-exe", "--executable", dest="executable", type=str, default=None,
+                                help="Automatically pick function definitions based on executable")
+    implicit_link_group = parser.add_argument_group()
+    parser.add_argument("--implicit-functions", dest="implicit_functions", type=str, default=None,
+                        help="A list of DLLs and functions in JSON that will be processed with implicit linking "
+                             "instead of runtime linking.")
+    parser.add_argument("--implicit-link-output", dest="implicit_link_output", type=str, default=None,
+                        help="Location to store import libraries for implicit linking.")
     parser.add_argument("-exl", "--extra-local-include", dest="extra_local_includes", type=str, action="append",
                         metavar="KEY=VALUE", default=None, help="Add an extra include directive to one library")
 
     args = parser.parse_args()
+
+    if args.implicit_functions and not args.implicit_link_output:
+        raise Exception("An output directory is required for storing import libraries.")
+
+    implicit_functions = None
+    if args.implicit_link_output and args.implicit_functions:
+        with open(args.implicit_functions, "r") as f:
+            implicit_functions = json.load(f)
 
     database = []
     for root, dirs, files in os.walk(args.input):
@@ -201,10 +222,12 @@ if __name__ == '__main__':
         "executable_imports": executable_imports,
         "extra_local_includes": extra_local_includes,
         "exclude_dlls": exclude_dlls,
+        "implicit_functions": implicit_functions,
     })
 
     for _import in executable_imports:
-        print("Unprocessed import {}".format(_import), file=sys.stderr)
+        print("Unprocessed import {} (they may have been excluded or an error has occurred)".format(_import),
+              file=sys.stderr)
     if executable_imports:
         print("Missing {} executable imports".format(len(executable_imports)))
 
@@ -233,3 +256,7 @@ if __name__ == '__main__':
 """
     with open(args.output_summary, "w") as f:
         f.write(includes_string_wrapped)
+
+    if args.implicit_link_output and implicit_functions:
+        if args.implicit_link_output:
+            generate_import_libraries(implicit_functions, args.implicit_link_output)

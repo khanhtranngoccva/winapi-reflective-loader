@@ -1,0 +1,22 @@
+[
+  {
+    "dll": "kernel32.dll",
+    "functions": [
+      "GetSystemTimeAsFileTime",
+      "IsDebuggerPresent",
+      "InitializeSListHead",
+      "GetCurrentThreadId",
+      "GetCurrentProcessId",
+      "RtlCaptureContext",
+      "RtlLookupFunctionEntry",
+      "RtlVirtualUnwind",
+      "UnhandledExceptionFilter",
+      "SetUnhandledExceptionFilter",
+      "GetCurrentProcess",
+      "TerminateProcess",
+      "IsProcessorFeaturePresent",
+      "QueryPerformanceCounter",
+      "GetModuleHandleW"
+    ]
+  }
+]

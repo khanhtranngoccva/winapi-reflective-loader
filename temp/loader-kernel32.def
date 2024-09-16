@@ -1,0 +1,17 @@
+LIBRARY kernel32.dll
+EXPORTS 
+    GetSystemTimeAsFileTime
+    IsDebuggerPresent
+    InitializeSListHead
+    GetCurrentThreadId
+    GetCurrentProcessId
+    RtlCaptureContext
+    RtlLookupFunctionEntry
+    RtlVirtualUnwind
+    UnhandledExceptionFilter
+    SetUnhandledExceptionFilter
+    GetCurrentProcess
+    TerminateProcess
+    IsProcessorFeaturePresent
+    QueryPerformanceCounter
+    GetModuleHandleW
